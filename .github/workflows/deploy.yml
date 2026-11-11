@@ -44,14 +44,16 @@ jobs:
         if: github.event_name == 'push' && env.SSH_HOST == ''
         run: echo "::warning::Deploy skipped. Add the SSH_HOST, SSH_USER, and SSH_PRIVATE_KEY repository secrets to deploy."
 
-      - name: Set up SSH
+        - name: Set up SSH
         if: github.event_name == 'push' && env.SSH_HOST != ''
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
+          ssh-keygen -y -f ~/.ssh/deploy_key > /dev/null
           ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
 
       # Copy only what the API needs to run. --delete removes files you've
