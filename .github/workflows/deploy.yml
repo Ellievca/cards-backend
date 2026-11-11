@@ -44,7 +44,7 @@ jobs:
         if: github.event_name == 'push' && env.SSH_HOST == ''
         run: echo "::warning::Deploy skipped. Add the SSH_HOST, SSH_USER, and SSH_PRIVATE_KEY repository secrets to deploy."
 
-        - name: Set up SSH
+      - name: Set up SSH
         if: github.event_name == 'push' && env.SSH_HOST != ''
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -65,7 +65,7 @@ jobs:
           rsync -az --delete --no-owner --no-group
           --exclude '.git/' --exclude '.github/' --exclude 'node_modules/'
           --exclude '.env' --exclude 'tests/' --exclude 'api-tests/' --exclude 'tutorials/'
-          -e "ssh -i ~/.ssh/deploy_key"
+          -e "ssh -i $HOME/.ssh/deploy_key -o IdentitiesOnly=yes -o BatchMode=yes"
           ./ "$SSH_USER@$SSH_HOST:$APP_DIR/"
 
       # Install production dependencies only (no nodemon, Vitest, ...),
